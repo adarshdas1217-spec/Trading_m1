@@ -1,0 +1,37 @@
+import streamlit as st
+import pandas as pd
+
+st.set_page_config(page_title="AI Intraday Scanner", layout="wide")
+
+st.title("📈 AI Intraday Trading Dashboard")
+
+# Load data
+@st.cache_data
+def load_data():
+    return pd.read_csv("results.csv")
+
+try:
+    df = load_data()
+except:
+    st.error("Run scanner first in Jupyter!")
+    st.stop()
+
+# Sidebar filter
+st.sidebar.header("Filters")
+min_conf = st.sidebar.slider("Min Confidence", 0.0, 1.0, 0.65)
+
+# All data
+st.subheader("📊 All Stocks")
+st.dataframe(df)
+
+# Best trades
+st.subheader("🔥 Best Trades")
+
+best = df[(df["signal"] == "BUY") & (df["confidence"] > min_conf)]
+st.dataframe(best)
+
+# Metrics
+st.subheader("📌 Summary")
+st.metric("Total Stocks", len(df))
+st.metric("BUY", len(df[df["signal"] == "BUY"]))
+st.metric("SELL", len(df[df["signal"] == "SELL"]))
